@@ -25,7 +25,7 @@
 
 #import "TGCameraColor.h"
 
-@interface TGCameraColor()
+@interface TGCameraColor ()
 
 + (UIColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue;
 
@@ -35,20 +35,21 @@
 
 @implementation TGCameraColor
 
-+ (UIColor *)grayColor
-{
-    return [self colorWithRed:200 green:200 blue:200];
++ (UIColor *)grayColor {
+	return [self colorWithRed:200 green:200 blue:200];
 }
 
-+ (UIColor *)orangeColor
-{
-    return [self colorWithRed:255 green:91 blue:1];
++ (UIColor *)orangeColor {
+	return [self colorWithRed:255 green:91 blue:1];
 }
 
-+ (UIColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue
-{
-    CGFloat divisor = 255.f;
-    return [self colorWithRed:red/divisor green:green/divisor blue:blue/divisor alpha:1];
++ (UIColor *)greenColor {
+	return [self colorWithRed:33 green:193 blue:144];
+}
+
++ (UIColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue {
+	CGFloat divisor = 255.f;
+	return [self colorWithRed:red / divisor green:green / divisor blue:blue / divisor alpha:1];
 }
 
 @end

@@ -30,9 +30,9 @@
 #import "TGCameraFilterView.h"
 #import "UIImage+CameraFilters.h"
 
-static NSString* const kTGCacheSatureKey = @"TGCacheSatureKey";
-static NSString* const kTGCacheCurveKey = @"TGCacheCurveKey";
-static NSString* const kTGCacheVignetteKey = @"TGCacheVignetteKey";
+static NSString *const kTGCacheSatureKey = @"TGCacheSatureKey";
+static NSString *const kTGCacheCurveKey = @"TGCacheCurveKey";
+static NSString *const kTGCacheVignetteKey = @"TGCacheVignetteKey";
 
 
 
@@ -45,7 +45,7 @@ static NSString* const kTGCacheVignetteKey = @"TGCacheVignetteKey";
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *topViewHeight;
 
-@property (weak) id<TGCameraDelegate> delegate;
+@property (weak) id <TGCameraDelegate> delegate;
 @property (strong, nonatomic) UIView *detailFilterView;
 @property (strong, nonatomic) UIImage *photo;
 @property (strong, nonatomic) NSCache *cachePhoto;
@@ -69,188 +69,178 @@ static NSString* const kTGCacheVignetteKey = @"TGCacheVignetteKey";
 
 @implementation TGPhotoViewController
 
-+ (instancetype)newWithDelegate:(id<TGCameraDelegate>)delegate photo:(UIImage *)photo
-{
-    TGPhotoViewController *viewController = [TGPhotoViewController newController];
-    
-    if (viewController) {
-        viewController.delegate = delegate;
-        viewController.photo = photo;
-        viewController.cachePhoto = [[NSCache alloc] init];
-    }
-    
-    return viewController;
++ (instancetype)newWithDelegate:(id <TGCameraDelegate> )delegate photo:(UIImage *)photo {
+	TGPhotoViewController *viewController = [TGPhotoViewController newController];
+
+	if (viewController) {
+		viewController.delegate = delegate;
+		viewController.photo = photo;
+		viewController.cachePhoto = [[NSCache alloc] init];
+	}
+
+	return viewController;
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    
-    if (CGRectGetHeight([[UIScreen mainScreen] bounds]) <= 480) {
-        _topViewHeight.constant = 0;
-    }
-    
-    _photoView.clipsToBounds = YES;
-    _photoView.image = _photo;
-    
-    [self addDetailViewToButton:_defaultFilterButton];
+- (void)viewDidLoad {
+	[super viewDidLoad];
+
+	if (CGRectGetHeight([[UIScreen mainScreen] bounds]) <= 480) {
+		_topViewHeight.constant = 0;
+	}
+
+	_photoView.clipsToBounds = YES;
+	_photoView.image = _photo;
+
+	[self addDetailViewToButton:_defaultFilterButton];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
+- (void)didReceiveMemoryWarning {
+	[super didReceiveMemoryWarning];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-    return YES;
+- (BOOL)prefersStatusBarHidden {
+	return YES;
 }
 
-- (void)dealloc
-{
-    _photoView = nil;
-    _bottomView = nil;
-    _filterView = nil;
-    _defaultFilterButton = nil;
-    _detailFilterView = nil;
-    _photo = nil;
-    _cachePhoto = nil;
+- (void)dealloc {
+	_photoView = nil;
+	_bottomView = nil;
+	_filterView = nil;
+	_defaultFilterButton = nil;
+	_detailFilterView = nil;
+	_photo = nil;
+	_cachePhoto = nil;
 }
 
 #pragma mark -
 #pragma mark - Controller actions
 
-- (IBAction)backTapped
-{
-    [self.navigationController popViewControllerAnimated:YES];
+- (IBAction)backTapped {
+	[self.navigationController popViewControllerAnimated:YES];
 }
 
-- (IBAction)confirmTapped
-{
-    if ( [_delegate respondsToSelector:@selector(cameraWillTakePhoto)]) {
-        [_delegate cameraWillTakePhoto];
-    }
-    
-    if ([_delegate respondsToSelector:@selector(cameraDidTakePhoto:)]) {
-        _photo = _photoView.image;
-        
-        if (_albumPhoto) {
-            [_delegate cameraDidSelectAlbumPhoto:_photo];
-        } else {
-            [_delegate cameraDidTakePhoto:_photo];
-        }
-        
-        ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
-        TGAssetsLibrary *library = [TGAssetsLibrary defaultAssetsLibrary];
-        
-        void (^saveJPGImageAtDocumentDirectory)(UIImage *) = ^(UIImage *photo) {
-            [library saveJPGImageAtDocumentDirectory:_photo resultBlock:^(NSURL *assetURL) {
-                [_delegate cameraDidSavePhotoAtPath:assetURL];
-            } failureBlock:^(NSError *error) {
-                if ([_delegate respondsToSelector:@selector(cameraDidSavePhotoWithError:)]) {
-                    [_delegate cameraDidSavePhotoWithError:error];
-                }
-            }];
-        };
-        
-        if ([[TGCamera getOption:kTGCameraOptionSaveImageToAlbum] boolValue] && status != ALAuthorizationStatusDenied) {
-            [library saveImage:_photo resultBlock:^(NSURL *assetURL) {
-                if ([_delegate respondsToSelector:@selector(cameraDidSavePhotoAtPath:)]) {
-                    [_delegate cameraDidSavePhotoAtPath:assetURL];
-                }
-            } failureBlock:^(NSError *error) {
-                saveJPGImageAtDocumentDirectory(_photo);
-            }];
-        } else {
-            if ([_delegate respondsToSelector:@selector(cameraDidSavePhotoAtPath:)]) {
-                saveJPGImageAtDocumentDirectory(_photo);
-            }
-        }
-    }
+- (IBAction)confirmTapped {
+	if ([_delegate respondsToSelector:@selector(cameraWillTakePhoto)]) {
+		[_delegate cameraWillTakePhoto];
+	}
+
+	if ([_delegate respondsToSelector:@selector(cameraDidTakePhoto:)]) {
+		_photo = _photoView.image;
+
+		if (_albumPhoto) {
+			[_delegate cameraDidSelectAlbumPhoto:_photo];
+		}
+		else {
+			[_delegate cameraDidTakePhoto:_photo];
+		}
+
+		ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
+		TGAssetsLibrary *library = [TGAssetsLibrary defaultAssetsLibrary];
+
+		void (^saveJPGImageAtDocumentDirectory)(UIImage *) = ^(UIImage *photo) {
+			[library saveJPGImageAtDocumentDirectory:_photo resultBlock: ^(NSURL *assetURL) {
+			    [_delegate cameraDidSavePhotoAtPath:assetURL];
+			} failureBlock: ^(NSError *error) {
+			    if ([_delegate respondsToSelector:@selector(cameraDidSavePhotoWithError:)]) {
+			        [_delegate cameraDidSavePhotoWithError:error];
+				}
+			}];
+		};
+
+		if ([[TGCamera getOption:kTGCameraOptionSaveImageToAlbum] boolValue] && status != ALAuthorizationStatusDenied) {
+			[library saveImage:_photo resultBlock: ^(NSURL *assetURL) {
+			    if ([_delegate respondsToSelector:@selector(cameraDidSavePhotoAtPath:)]) {
+			        [_delegate cameraDidSavePhotoAtPath:assetURL];
+				}
+			} failureBlock: ^(NSError *error) {
+			    saveJPGImageAtDocumentDirectory(_photo);
+			}];
+		}
+		else {
+			if ([_delegate respondsToSelector:@selector(cameraDidSavePhotoAtPath:)]) {
+				saveJPGImageAtDocumentDirectory(_photo);
+			}
+		}
+	}
 }
 
-- (IBAction)filtersTapped
-{
-    if ([_filterView isDescendantOfView:self.view]) {
-        [_filterView removeFromSuperviewAnimated];
-    } else {
-        [_filterView addToView:self.view aboveView:_bottomView];
-        [self.view sendSubviewToBack:_filterView];
-        [self.view sendSubviewToBack:_photoView];
-    }
+- (IBAction)filtersTapped {
+	if ([_filterView isDescendantOfView:self.view]) {
+		[_filterView removeFromSuperviewAnimated];
+	}
+	else {
+		[_filterView addToView:self.view aboveView:_bottomView];
+		[self.view sendSubviewToBack:_filterView];
+		[self.view sendSubviewToBack:_photoView];
+	}
 }
 
 #pragma mark -
 #pragma mark - Filter view actions
 
-- (IBAction)defaultFilterTapped:(UIButton *)button
-{
-    [self addDetailViewToButton:button];
-    _photoView.image = _photo;
+- (IBAction)defaultFilterTapped:(UIButton *)button {
+	[self addDetailViewToButton:button];
+	_photoView.image = _photo;
 }
 
-- (IBAction)satureFilterTapped:(UIButton *)button
-{
-    [self addDetailViewToButton:button];
-    
-    if ([_cachePhoto objectForKey:kTGCacheSatureKey]) {
-        _photoView.image = [_cachePhoto objectForKey:kTGCacheSatureKey];
-    } else {
-        [_cachePhoto setObject:[_photo saturateImage:1.8 withContrast:1] forKey:kTGCacheSatureKey];
-        _photoView.image = [_cachePhoto objectForKey:kTGCacheSatureKey];
-    }
-    
+- (IBAction)satureFilterTapped:(UIButton *)button {
+	[self addDetailViewToButton:button];
+
+	if ([_cachePhoto objectForKey:kTGCacheSatureKey]) {
+		_photoView.image = [_cachePhoto objectForKey:kTGCacheSatureKey];
+	}
+	else {
+		[_cachePhoto setObject:[_photo saturateImage:1.8 withContrast:1] forKey:kTGCacheSatureKey];
+		_photoView.image = [_cachePhoto objectForKey:kTGCacheSatureKey];
+	}
 }
 
-- (IBAction)curveFilterTapped:(UIButton *)button
-{
-    [self addDetailViewToButton:button];
-    
-    if ([_cachePhoto objectForKey:kTGCacheCurveKey]) {
-        _photoView.image = [_cachePhoto objectForKey:kTGCacheCurveKey];
-    } else {
-        [_cachePhoto setObject:[_photo curveFilter] forKey:kTGCacheCurveKey];
-        _photoView.image = [_cachePhoto objectForKey:kTGCacheCurveKey];
-    }
+- (IBAction)curveFilterTapped:(UIButton *)button {
+	[self addDetailViewToButton:button];
+
+	if ([_cachePhoto objectForKey:kTGCacheCurveKey]) {
+		_photoView.image = [_cachePhoto objectForKey:kTGCacheCurveKey];
+	}
+	else {
+		[_cachePhoto setObject:[_photo curveFilter] forKey:kTGCacheCurveKey];
+		_photoView.image = [_cachePhoto objectForKey:kTGCacheCurveKey];
+	}
 }
 
-- (IBAction)vignetteFilterTapped:(UIButton *)button
-{
-    [self addDetailViewToButton:button];
-    
-    if ([_cachePhoto objectForKey:kTGCacheVignetteKey]) {
-        _photoView.image = [_cachePhoto objectForKey:kTGCacheVignetteKey];
-    } else {
-        [_cachePhoto setObject:[_photo vignetteWithRadius:0 intensity:6] forKey:kTGCacheVignetteKey];
-        _photoView.image = [_cachePhoto objectForKey:kTGCacheVignetteKey];
-    }
-}
+- (IBAction)vignetteFilterTapped:(UIButton *)button {
+	[self addDetailViewToButton:button];
 
+	if ([_cachePhoto objectForKey:kTGCacheVignetteKey]) {
+		_photoView.image = [_cachePhoto objectForKey:kTGCacheVignetteKey];
+	}
+	else {
+		[_cachePhoto setObject:[_photo vignetteWithRadius:0 intensity:6] forKey:kTGCacheVignetteKey];
+		_photoView.image = [_cachePhoto objectForKey:kTGCacheVignetteKey];
+	}
+}
 
 #pragma mark -
 #pragma mark - Private methods
 
-- (void)addDetailViewToButton:(UIButton *)button
-{
-    [_detailFilterView removeFromSuperview];
-    
-    CGFloat height = 2.5;
-    
-    CGRect frame = button.frame;
-    frame.size.height = height;
-    frame.origin.x = 0;
-    frame.origin.y = CGRectGetMaxY(button.frame) - height;
-    
-    _detailFilterView = [[UIView alloc] initWithFrame:frame];
-    _detailFilterView.backgroundColor = [TGCameraColor orangeColor];
-    _detailFilterView.userInteractionEnabled = NO;
-    
-    [button addSubview:_detailFilterView];
+- (void)addDetailViewToButton:(UIButton *)button {
+	[_detailFilterView removeFromSuperview];
+
+	CGFloat height = 2.5;
+
+	CGRect frame = button.frame;
+	frame.size.height = height;
+	frame.origin.x = 0;
+	frame.origin.y = CGRectGetMaxY(button.frame) - height;
+
+	_detailFilterView = [[UIView alloc] initWithFrame:frame];
+	_detailFilterView.backgroundColor = [TGCameraColor greenColor];
+	_detailFilterView.userInteractionEnabled = NO;
+
+	[button addSubview:_detailFilterView];
 }
 
-+ (instancetype)newController
-{
-    return [super new];
++ (instancetype)newController {
+	return [super new];
 }
 
 @end
